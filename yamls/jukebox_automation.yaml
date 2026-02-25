@@ -1,0 +1,58 @@
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++#
+# NFC-Triggered Music Playback
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++#
+- alias: TagScan_PlayMusic
+  max_exceeded: silent
+  variables:
+    # Map scanner device ID to media player entity ID
+    media_players:
+      afba1824b174607d734bxvxv0896dcf0: media_player.sonos_livingroom_mass
+      36efe8f67c6b9gegr207cc9afb408126: media_player.sonos_kidsroom_mass
+    # All my Music Assistant media players
+    media_player_mass_list:
+      - media_player.sonos_livingroom_mass
+      - media_player.sonos_kidsroom_mass
+      - media_player.sonos_office_mass
+    # Map tag ID to content
+    tags: !include tag_list.yaml
+  triggers:
+    - trigger: event
+      event_type: tag_scanned
+  conditions:
+    # Test that we support this device and tag
+    - "{{ trigger.event.data.tag_id in tags }}"
+    - "{{ trigger.event.data.device_id in media_players }}"
+  actions:
+    - variables:
+        target_player: "{{ media_players[trigger.event.data.device_id] }}"
+        media_id: "{{ tags[trigger.event.data.tag_id].media_id }}"
+        media_type: "{{ tags[trigger.event.data.tag_id].media_type }}"
+        source_player: >-
+          {% set active_players = media_player_mass_list | select('is_state', 'playing') | list %}
+          {% set found = namespace(entity_id=none) %}
+          {% for p in active_players if p != target_player %}
+            {% if state_attr(p, 'media_album_name') == media_id %}
+              {% set found.entity_id = p %}
+            {% endif %}
+          {% endfor %}
+          {{ found.entity_id if found.entity_id is not none else '' }}
+    - choose:
+        # If the album is being played on another media player, transfer the queue to target player
+        - conditions: "{{ source_player != none and source_player != 'None' and source_player != '' }}"
+          sequence:
+            - action: music_assistant.transfer_queue
+              target:
+                entity_id: "{{ target_player }}"
+              data:
+                source_player: "{{ source_player }}"
+                auto_play: true
+      default:
+        # By default, start fresh playback on the target media player
+        - action: music_assistant.play_media
+          target:
+            entity_id: "{{ target_player }}"
+          data:
+            media_id: "{{ media_id }}"
+            media_type: "{{ media_type }}"
+    # timeout before we allow processing next scan
+    - delay: 2
