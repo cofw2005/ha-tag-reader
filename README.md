@@ -38,6 +38,10 @@ I have structured the documentation to guide you through the initial build and t
   <img src="images/c01.printed_tags.jpg" width="600" alt="Final Assembly Result">
 </div>
 
+
+### 4. Modified Case for type C D1 Mini
+*I adapted the original case stl files from Adonno slightly, only modified the opening to fit for the Type-C version of D1 Mini board. See the file in stl folder.*
+
 ---
 
 ## 🤝 Acknowledgments
