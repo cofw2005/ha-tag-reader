@@ -40,7 +40,13 @@ I have structured the documentation to guide you through the initial build and t
 
 
 ### 4. Modified Case for type C D1 Mini
-*I adapted the original case stl files from Adonno slightly, only modified the opening to fit for the Type-C version of D1 Mini board. See the file in stl folder.*
+
+I've made some slight modifications to the original STL files from adonno:
+1. Adjusted the opening to fit the USB Type-C version of the D1 mini board.
+2. I had some minor issues fitting the PN532 board onto the alignment posts, so I shifted one of them by approximately 0.2mm for a better fit.
+3. Updated the Home Assistant logo on the top surface to the latest official version.
+
+*See the file in stl folder.*
 
 ---
 
